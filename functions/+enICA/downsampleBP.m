@@ -8,6 +8,10 @@ nCond = numel(conditions);
 % where to save processed EEG data
 baseFolder_save = enICA.getPath('EEG','processed');
 
+% loach chanLocs info
+chanLocs = load(enICA.getPath('chanLocs'));
+chanLocs = chanLocs.chanLocs;
+
 saveOpt.do = false;
 
 % string describing processing
@@ -46,21 +50,31 @@ for iCond = 1:nCond
             % load raw data
             folderPath = enICA.makePathEEGFolder(baseFolder_load,inFile.proc,inFile.Fs);
             % no extension
-            fileName = enICA.makeNameEEGDataFile(inFile.proc,inFile.Fs,SID,condition,iPart);
-            filePath = fullfile(folderPath,[fileName,inFile.ext]);
+            fileName = enICA.makeNameEEGDataFile(SID,condition,iPart);
             
-            if ~exist(filePath,'file')
+            % load
+            try
+                EEG = enICA.loadEEG(folderPath, [fileName,inFile.ext]);
+            catch
                 warning('%s could not be found, skipping.',fileName);
                 continue;
             end
             
-            EEG = pop_fileio(filePath,'dataformat','auto');
+            % add markers of stimulus begin / end
+            [iB,iE] = enICA.getLatencyStimulus(EEG);
+            EEG = MEEGtools.addEvents(EEG,iB,'stimBegin',condition);
+            EEG = MEEGtools.addEvents(EEG,iE,'stimEnd',condition);
             
-            saveOpt.folder = MEGTFS.makePathMEGFolder(baseFolder_save,proc,Fs_,SID);
+            % EEG.chanlocs & chanLocs do not appear to be consistent.
+            % Replacing EEG.chanLocs by chanLocs instead.
+            % % if chanLocs are missing, add them back in
+            % EEG = MEEGtools.addMissingChanLocations(EEG,chanLocs);
+%             error('fix me');
+            
+            % filter / resample
             EEG = MEEGtools.downsampleBP(EEG,filtOpt,saveOpt);
-            
+            % save
             EEG = pop_saveset(EEG, 'filename', [fileName,'.set'], 'filepath', saveFolder);
-            
             % print comments to stand alone log file
             log = cellstr(EEG.comments);
             fileID = fopen(fullfile(saveFolder,[fileName,'.log']),'w');

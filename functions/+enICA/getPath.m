@@ -19,6 +19,10 @@ switch varargin{1}
         % varargin{2}: 'raw' or 'processed'
         topFolder = fullfile(dataFolder,varargin{2});
         
+    case 'chanLocs'
+        % full path to montage file
+        topFolder = fullfile(dataFolder,'chanLocs-64.mat');
+        
     otherwise
         error('Unrecognised option.')
 end
