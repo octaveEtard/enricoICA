@@ -4,12 +4,11 @@
 %
 allSID = arrayfun(@(i) sprintf('sub%i',i),1,'UniformOutput',false);
 allConditions = {...
-    '00',...
-    '1e_AV'};
+    '00'};
 
 parts = 0:4;
 
-opt.in.proc = 'BP-1-12'; % processing of the data to use
+opt.in.proc = 'BP-1-70'; % processing of the data to use
 opt.in.Fs = 200; % sampling rate of the data to use
 
 % if true, run one ICA per subject, on the data pooled accross conditions
@@ -40,7 +39,17 @@ ICAopt.type = 'binica';
 % where binica / AMICA should write their tmp files
 ICAopt.tmpdir = '/home/octave/icaouttmp';
 
-% parameters to pass to ICA algo; see e.g. binica for options
+
+% whether to reduce rank before ICA, these will be passed to ICA algo
+% 'full': keep the rank of the data (potentially less than nb channel)
+% 'conservative': same but with more conservative estimate of rank
+% 'var' : keep fraction of var, in this case opt.var = fraction of var to
+% keep
+ICAopt.rank = 'conservative'; % 'full' or 'conservative' or 'var'
+ICAopt.var = 0.999; % used only if opt.rank == var
+% ------
+
+% parameters to pass directly to ICA algo; see e.g. binica for options
 switch ICAopt.type
     
     case {'runica','binica'}
@@ -58,14 +67,6 @@ switch ICAopt.type
             'min_grad_norm',1e-5,...
             'use_min_dll',true,...
             'min_dll',1e-6};
-        
-        % whether to reduce rank before ICA
-        % 'full': keep the rank of the data (potentially less than nb channel)
-        % 'var' : keep fraction of var, in this case opt.var = fraction of var to
-        % keep
-        ICAopt.rank = 'full'; % 'full' or 'conservative' or 'var' (in this case )
-        ICAopt.var = 0.999; % used only if opt.rank == var
-        % ------
 end
 
 % path for the required things to run if using parallel jobs

@@ -29,24 +29,37 @@ inFile.Fs = 1000;
 inFile.proc = 'none';
 inFile.ext = '.fif';
 
-% filter options
-
+opt = [];
+% ---- filter options
 % cortical
-filtOpt = [];
-filtOpt.resample.do = true;
-filtOpt.resample.Fr = 200;
+opt.filt = [];
+opt.filt.resample.do = true;
+opt.filt.resample.Fr = 200;
 %
-filtOpt.LP.do = true;
-filtOpt.LP.Fc = 13;
-filtOpt.LP.TBW = 2;
-filtOpt.LP.causal = false;
+opt.filt.LP.do = true;
+opt.filt.LP.Fc = 90;
+opt.filt.LP.TBW = 20;
+opt.filt.LP.causal = false;
 %
-filtOpt.HP.do = true;
-filtOpt.HP.Fc = 0.5;
-filtOpt.HP.TBW = 1;
-filtOpt.HP.passbandRipples = 2e-3;
-filtOpt.HP.causal = false;
+opt.filt.HP.do = true;
+opt.filt.HP.Fc = 0.5;
+opt.filt.HP.TBW = 1;
+opt.filt.HP.passbandRipples = 2e-3;
+opt.filt.HP.causal = false;
 
-enICA.downsampleBP(allSID,conditions,parts,inFile,filtOpt)
+% ---- ASR options
+opt.ASR.do = true;
+% opt to pass to 'clean_artifacts' ; comment out or set to {} to use
+% default values
+% high-pass already taken care of
+% WindowCriterion:off > keep irreparable windows to avoid creating holes in
+% the dataset
+opt.ASR.opt = {'Highpass','off','WindowCriterion','off'};
+
+% ---- interpolate missing or removed channels (based on 64 channels)
+opt.interpolate.do = true;
+
+% ---- run all this
+enICA.preProc(allSID,conditions,parts,inFile,opt)
 %
 %

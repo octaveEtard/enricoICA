@@ -18,13 +18,16 @@ if isempty(ext)
     end
 end
 
+if ~exist(fullfile(inFolder, inFileName),'file')
+    error('Could not find %s in %s',inFileName,inFolder);
+end
+
 if strcmp(ext, '.set')
     EEG = pop_loadset(inFileName, inFolder);
     EEG.filename = baseName;
     
 elseif strcmp(ext, '.fif')
     EEG = pop_fileio(fullfile(inFolder,inFileName),'dataformat','auto');
-    
 else
     error('Incorrect extension provided');
 end
