@@ -7,8 +7,11 @@ function topFolder = getPath(varargin)
 % quick switch between different machines
 if isunix()
     dataFolder = '/run/media/octave/MEGdataBKP/enricoData';
+elseif ismac()
+    % for Enrico
 else
-    dataFolder = 'C:\Users\oe411\dataEnrico';
+    % windows assumed
+    dataFolder = 'D:\dataEnrico';
 end
 %
 %
