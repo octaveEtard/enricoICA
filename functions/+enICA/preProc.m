@@ -88,6 +88,9 @@ for iCond = 1:nCond
                 if opt.interpolate.do
                     EEG = MEEGtools.interpolateMissingChannels(EEG,chanLocs);
                 end
+                if opt.averageReference.do
+                    EEG = MEEGtools.averageReReference(EEG,{},false);
+                end
                 % save
                 EEG = pop_saveset(EEG, 'filename', [fileName,'.set'], 'filepath', saveFolder);
                 % print comments to standalone log file
@@ -114,6 +117,7 @@ for iCond = 1:nCond
         nRem = sum(removed_channels);
         % original chan info in urchanlocs
         remChan = {EEG.urchanlocs(removed_channels).labels};
+        % TODO store % data too dirty
         
         comments{nParts+2} = sprintf('Run ASR, opt:%s',sprintf(' %s',opt.ASR.opt{:}));
         comments{nParts+3} = sprintf('%i removed channels:%s',nRem,sprintf(' %s',remChan{:}));
@@ -124,6 +128,11 @@ for iCond = 1:nCond
         % ---- interpolate removed / missing channels
         if opt.interpolate.do
             EEG = MEEGtools.interpolateMissingChannels(EEG,chanLocs);
+        end
+        
+        % ---- average re-reference
+        if opt.averageReference.do
+            EEG = MEEGtools.averageReReference(EEG,{},false);
         end
         
         % ---- split data sets and save

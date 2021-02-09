@@ -59,6 +59,9 @@ opt.ASR.opt = {'Highpass','off','WindowCriterion','off'};
 % ---- interpolate missing or removed channels (based on 64 channels)
 opt.interpolate.do = true;
 
+% ---- do average reference
+opt.averageReference.do = true;
+
 % ---- run all this
 enICA.preProc(allSID,conditions,parts,inFile,opt)
 %
