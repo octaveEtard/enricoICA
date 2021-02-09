@@ -48,10 +48,14 @@ opt.filt.HP.passbandRipples = 2e-3;
 opt.filt.HP.causal = false;
 
 % ---- ASR options
+% NB: ASR will run for each subject x condition on the data concatenated
+% over all parts. TODO does this make sense? How was the data recorded?
+% Which part are contiguous in time?
+%
 opt.ASR.do = true;
-% opt to pass to 'clean_artifacts' ; comment out or set to {} to use
+% options to pass to 'clean_artifacts' ; comment out or set to {} to use
 % default values
-% high-pass already taken care of
+% high-pass:off > already taken care of
 % WindowCriterion:off > keep irreparable windows to avoid creating holes in
 % the dataset
 opt.ASR.opt = {'Highpass','off','WindowCriterion','off'};
