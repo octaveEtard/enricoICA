@@ -36,6 +36,12 @@ end
 
 % merge data sets
 EEG = pop_mergeset( ALLEEG, 1:nFiles, 0);
+%
+comments = cell(1+nFiles,1);
+comments{1} = 'Keep only data during stimulus & merge datasets:';
+comments(2:(nFiles+1)) = filesWithExt;
+EEG = MEEGtools.addComments(EEG,comments);
+
 end
 %
 %

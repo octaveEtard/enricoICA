@@ -8,7 +8,7 @@ allConditions = {...
 
 parts = 0:4;
 
-opt.in.proc = 'BP-1-70'; % processing of the data to use
+opt.in.proc = 'BP-1-80'; % processing of the data to use
 opt.in.Fs = 200; % sampling rate of the data to use
 
 % if true, run one ICA per subject, on the data pooled accross conditions
@@ -41,20 +41,22 @@ ICAopt.tmpdir = '/home/octave/icaouttmp';
 
 
 % whether to reduce rank before ICA, these will be passed to ICA algo
+% This may need some adjusting if ICA produces NaN of identical ICs with
+% opposite polarities
 % 'full': keep the rank of the data (potentially less than nb channel)
 % 'conservative': same but with more conservative estimate of rank
-% 'var' : keep fraction of var, in this case opt.var = fraction of var to
-% keep
+% 'var' : keep fraction of var, in this case opt.keepVar = fraction of var 
+% to keep
 ICAopt.rank = 'conservative'; % 'full' or 'conservative' or 'var'
-ICAopt.var = 0.999; % used only if opt.rank == var
+ICAopt.keepVar = 0.9999; % used only if opt.rank == var
 % ------
 
-% parameters to pass directly to ICA algo; see e.g. binica for options
+% other parameters to pass directly to ICA algo; see e.g. binica or AMICA
+% for options
 switch ICAopt.type
     
     case {'runica','binica'}
-        % for runica / binica ; NB pop_runica should take care of PCA if
-        % required
+        % for runica / binica 
         ICAopt.algParams = {'interrupt','off','maxsteps',2000};
         
     case 'AMICA'

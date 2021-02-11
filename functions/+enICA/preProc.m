@@ -117,9 +117,13 @@ for iCond = 1:nCond
         nRem = sum(removed_channels);
         % original chan info in urchanlocs
         remChan = {EEG.urchanlocs(removed_channels).labels};
-        % TODO store % data too dirty
+        % TODO store percent data too dirty
         
-        comments{nParts+2} = sprintf('Run ASR, opt:%s',sprintf(' %s',opt.ASR.opt{:}));
+        % add comments
+        asropt = cell(numel(opt.ASR.opt),1);
+        [asropt{:}] = MEEGtools.printArgs('%.2e',opt.ASR.opt{:});
+
+        comments{nParts+2} = sprintf('Run ASR, opt:%s',sprintf(' %s',asropt{:}));
         comments{nParts+3} = sprintf('%i removed channels:%s',nRem,sprintf(' %s',remChan{:}));
         
         % ---- add commens for the last operations
