@@ -28,7 +28,7 @@ opt.doICLabel = true;
 % reject IC based on classfication by ICLabel
 opt.rejectIC.do = true;
 % rejection parameters, see MEEGtools.rejectICs
-opt.rejectIC.rok = 'reject';   
+opt.rejectIC.rok = 'reject';
 opt.rejectIC.thresholds = [...
     0   0;... % 'Brain'
     0.8 1;... % 'Muscle'
@@ -50,7 +50,7 @@ ICAopt.tmpdir = '/home/octave/icaouttmp';
 % opposite polarities
 % 'full': keep the rank of the data (potentially less than nb channel)
 % 'conservative': same but with more conservative estimate of rank
-% 'var' : keep fraction of var, in this case opt.keepVar = fraction of var 
+% 'var' : keep fraction of var, in this case opt.keepVar = fraction of var
 % to keep
 ICAopt.rank = 'conservative'; % 'full' or 'conservative' or 'var'
 ICAopt.keepVar = 0.9999; % used only if opt.rank == var
@@ -61,7 +61,7 @@ ICAopt.keepVar = 0.9999; % used only if opt.rank == var
 switch ICAopt.type
     
     case {'runica','binica'}
-        % for runica / binica 
+        % for runica / binica
         ICAopt.algParams = {'interrupt','off','maxsteps',2000};
         
     case 'AMICA'
@@ -74,11 +74,13 @@ switch ICAopt.type
             'min_grad_norm',1e-5,...
             'use_min_dll',true,...
             'min_dll',1e-6};
+        
+        % path for the required things to run if using parallel jobs
+        AMICApath = [getDefaultPath('eeglab'),...
+            makeEEGLABpath(getDefaultPath('eeglab'), {'AMICA15','ICLabel0.1'})];
+        
 end
 
-% path for the required things to run if using parallel jobs
-AMICApath = [getDefaultPath('eeglab'),...
-    makeEEGLABpath(getDefaultPath('eeglab'), {'AMICA15','ICLabel0.1'})];
 
 % Get-Process amica* | select starttime, id
 
