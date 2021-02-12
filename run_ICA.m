@@ -8,7 +8,7 @@ allConditions = {...
 
 parts = 0:4;
 
-opt.in.proc = 'BP-1-80'; % processing of the data to use
+opt.in.proc = 'BP-1-80-ASR-INTP-AVR'; % processing of the data to use
 opt.in.Fs = 200; % sampling rate of the data to use
 
 % if true, run one ICA per subject, on the data pooled accross conditions
@@ -25,13 +25,18 @@ opt.job.nParMax = 4;
 % run ICLabel after ICA
 opt.doICLabel = true;
 
-% save ICA results in a standalone files
-opt.save.separateFile.do = false; % TODO implement file path
-
-% save the EEG file on which ICA was run with its ICA information
-% TODO implement file path + if concatenateConditions save each file
-% independently?
-opt.save.EEGfile.do = false;
+% reject IC based on classfication by ICLabel
+opt.rejectIC.do = true;
+% rejection parameters, see MEEGtools.rejectICs
+opt.rejectIC.rok = 'reject';   
+opt.rejectIC.thresholds = [...
+    0   0;... % 'Brain'
+    0.8 1;... % 'Muscle'
+    0.8 1;... % 'Eye'
+    0.8 1;... % 'Heart'
+    0.8 1;... % 'Line Noise'
+    0.8 1;... % 'Channel Noise'
+    0   0];   % 'Other'
 
 
 %% Set ICA options

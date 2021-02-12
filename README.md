@@ -9,10 +9,12 @@ Edit `enICA.getPath` to specify data location.
 
 ## Pipeline
 Run `run_preprocessing` first for filtering + downsampling + ASR + interpolation + average reference.
-Then run `run_ICA` to run ICA + classification(ICLabel)
+    -> This will save new processed EEG files.
+Then run `run_ICA` to run ICA + classification(ICLabel) + rejection of ICs
+    -> This will save new EEG files with ICs removed.
 
 ## TODO:
-- implement ICA cleaning (currently only ICA + classif; need to add rejection of IC & backprojection)
 - add % bad data as identified by ASR
+- add saving of ICA weights to standalone file
 - add option to run preprocessing in parallel (already in for ICA)
 - clean-up AMICA code

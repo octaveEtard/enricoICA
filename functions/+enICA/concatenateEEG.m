@@ -30,7 +30,7 @@ for iFile = 1:nFiles
     end
     EEG = pop_select(EEG,'point',[iB,iE]);
     % ---
-    
+
     [ALLEEG, ~, ~] = eeg_store( ALLEEG, EEG, 0 );
 end
 
@@ -39,7 +39,7 @@ EEG = pop_mergeset( ALLEEG, 1:nFiles, 0);
 %
 comments = cell(1+nFiles,1);
 comments{1} = 'Keep only data during stimulus & merge datasets:';
-comments(2:(nFiles+1)) = filesWithExt;
+[comments{2:(nFiles+1)}] = deal(ALLEEG.setname);
 EEG = MEEGtools.addComments(EEG,comments);
 
 end

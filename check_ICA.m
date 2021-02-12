@@ -1,5 +1,5 @@
-fileName = 'testICA.set';
-folder = '';
+fileName = 'sub1_00_0.set';
+folder = '/run/media/octave/MEGdataBKP/enricoData/processed/Fs-200/BP-1-80-ASR-INTP-AVR-ICr';
 EEG = pop_loadset(fileName,folder);
 
 

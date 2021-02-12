@@ -17,23 +17,25 @@ if opt.ASR.do && ~isfield(opt.ASR,'opt')
     opt.ASR.opt = {}; % use default values
 end
 
-% required input to the MEEGtools.dowsampleBP function, saving will be done
-% outside of it
-saveOpt = [];
-saveOpt.do = false;
+% --- string describing processing
+proc = MEEGtools.makeFiltString(opt.filt);
+if opt.ASR.do
+    proc = [proc,'-ASR'];
+end
+if opt.interpolate.do
+    proc = [proc,'-INTP'];
+end
+if opt.averageReference.do
+    proc = [proc,'-AVR'];
+end
 
-% string describing processing
 if isempty(inFile.proc) || strcmp(inFile.proc,'none')
-    proc = makeProcString(opt.filt);
     % where is the original data
     baseFolder_load = enICA.getPath('EEG','raw');
 else
     % stacking with previous processing if any
-    proc = [inFile.proc,'-',makeProcString(opt.filt)];
+    proc = [inFile.proc,'-',proc];
     baseFolder_load = baseFolder_save;
-    
-    % TODO if loading processed file, log file should be loaded as well
-    % to append relevant info
 end
 
 % new Fs
@@ -43,10 +45,6 @@ else
     Fs_ = inFile.Fs;
 end
 saveFolder = enICA.makePathEEGFolder(baseFolder_save,proc,Fs_);
-
-if ~exist(saveFolder,'dir')
-    mkdir(saveFolder);
-end
 
 for iCond = 1:nCond
     condition = conditions{iCond};
@@ -66,6 +64,7 @@ for iCond = 1:nCond
             fileName = enICA.makeNameEEGDataFile(SID,condition,idxPart);
             
             EEG = enICA.loadEEG(folderPath, [fileName,inFile.ext]);
+            EEG.setname = fileName;
             
             % add markers of stimulus begin / end
             [iB,iE] = enICA.getLatencyStimulus(EEG);
@@ -80,7 +79,7 @@ for iCond = 1:nCond
             EEG = MEEGtools.replaceChanLocs(EEG,chanLocs);
             
             % filter / resample
-            EEG = MEEGtools.downsampleBP(EEG,opt.filt,saveOpt);
+            EEG = MEEGtools.downsampleBP(EEG,opt.filt);
             
             if opt.ASR.do
                 [ALLEEG, ~, ~] = eeg_store( ALLEEG, EEG, iiPart );
@@ -92,12 +91,7 @@ for iCond = 1:nCond
                     EEG = MEEGtools.averageReReference(EEG,{},false);
                 end
                 % save
-                EEG = pop_saveset(EEG, 'filename', [fileName,'.set'], 'filepath', saveFolder);
-                % print comments to standalone log file
-                log = cellstr(EEG.comments);
-                fileID = fopen(fullfile(saveFolder,[fileName,'.log']),'w');
-                fprintf(fileID,'%s\n',log{:});
-                fclose(fileID);
+                EEG = enICA.saveEEG(EEG,fileName,saveFolder); %#ok<NASGU>
             end
         end
         
@@ -110,7 +104,7 @@ for iCond = 1:nCond
         % ---- merge data sets
         EEG = pop_mergeset( ALLEEG, 1:nParts, 0);
         comments{1} = 'Merged datasets:';
-        [comments{2:(nParts+1)}] = deal(ALLEEG.filename);
+        [comments{2:(nParts+1)}] = deal(ALLEEG.setname);
         
         % ---- run ASR
         [EEG,~,~,removed_channels] = clean_artifacts(EEG,opt.ASR.opt{:});
@@ -122,7 +116,7 @@ for iCond = 1:nCond
         % add comments
         asropt = cell(numel(opt.ASR.opt),1);
         [asropt{:}] = MEEGtools.printArgs('%.2e',opt.ASR.opt{:});
-
+        
         comments{nParts+2} = sprintf('Run ASR, opt:%s',sprintf(' %s',asropt{:}));
         comments{nParts+3} = sprintf('%i removed channels:%s',nRem,sprintf(' %s',remChan{:}));
         
@@ -158,12 +152,10 @@ for iCond = 1:nCond
             % save
             idxPart = parts(iiPart);
             fileName = enICA.makeNameEEGDataFile(SID,condition,idxPart);
-            EEGtmp = pop_saveset(EEGtmp, 'filename', [fileName,'.set'], 'filepath', saveFolder); %#ok<NASGU>
-            % print comments to stand alone log file
-            log = cellstr(EEG.comments);
-            fileID = fopen(fullfile(saveFolder,[fileName,'.log']),'w');
-            fprintf(fileID,'%s\n',log{:});
-            fclose(fileID);
+            
+            % save
+            EEGtmp.setname = [fileName,'-',proc];
+            EEGtmp = enICA.saveEEG(EEGtmp,fileName,saveFolder); %#ok<NASGU>
         end
     end
 end

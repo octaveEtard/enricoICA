@@ -24,17 +24,12 @@ end
 
 if strcmp(ext, '.set')
     EEG = pop_loadset(inFileName, inFolder);
-    EEG.filename = baseName;
     
 elseif strcmp(ext, '.fif')
     EEG = pop_fileio(fullfile(inFolder,inFileName),'dataformat','auto');
 else
     error('Incorrect extension provided');
 end
-
-% do not use EEG.setname as EEGLab also messes with it
-EEG.filename = baseName;
-
 end
 %
 %
