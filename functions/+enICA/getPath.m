@@ -5,13 +5,17 @@ function topFolder = getPath(varargin)
 % to save are located.
 %
 % quick switch between different machines
-if isunix()
-    dataFolder = '/run/media/octave/MEGdataBKP/enricoData';
-elseif ismac()
-    % for Enrico
-else
-    % windows assumed
+if ispc()
+    % windows machine, octave's assumed
     dataFolder = 'D:\dataEnrico';
+elseif ismac()
+    % mac machine, Enrico!
+    dataFolder = ''; % Enrico set this to your favourite folder
+elseif isunix()
+    % linux machinen octave's # assumed
+    dataFolder = '/run/media/octave/MEGdataBKP/enricoData';
+else
+
 end
 %
 %
