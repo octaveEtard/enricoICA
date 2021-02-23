@@ -56,9 +56,14 @@ opt.ASR.do = true;
 % options to pass to 'clean_artifacts' ; comment out or set to {} to use
 % default values
 % high-pass:off > already taken care of
-% WindowCriterion:off > keep irreparable windows to avoid creating holes in
-% the dataset
-opt.ASR.opt = {'Highpass','off','WindowCriterion','off'};
+% The fraction of 'irrecuperable' data points will be stored, but the data
+% will NOT be removed to avoid creating discontinuities
+%
+% The value is stored in :
+% EEG.etc.ASRirrecoverableFractionPooledData for the fraction on the pooled
+% data (+ in comments), and:
+% EEG.etc.ASRirrecoverableFraction for the fraction on each dataset.
+opt.ASR.opt = {'Highpass','off'};
 
 % ---- interpolate missing or removed channels (based on 64 channels)
 opt.interpolate.do = true;

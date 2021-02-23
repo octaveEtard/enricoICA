@@ -2,6 +2,8 @@
 % AMICA info
 % https://sccn.ucsd.edu/~jason/amica_help.html
 %
+
+% --- Input data
 allSID = arrayfun(@(i) sprintf('sub%i',i),1,'UniformOutput',false);
 allConditions = {...
     '00'};
@@ -15,6 +17,9 @@ opt.in.Fs = 200; % sampling rate of the data to use
 % and parts; otherwise run one ICA per subject x condition, on the data
 % pooled across parts
 opt.concatenateConditions = false;
+
+
+% --- parallel options
 % run multiple jobs in parallel on the local machine
 opt.job.runParallel = false;
 % max number of independent jobs (ICAs) to run in parallel
@@ -22,12 +27,19 @@ opt.job.runParallel = false;
 % N.B: 'binica' does not appear to be multi-threaded
 opt.job.nParMax = 4;
 
-% run ICLabel after ICA
+
+% --- IC classification
+% run ICLabel after ICA (only classification method implemented atm)
 opt.doICLabel = true;
 
-% reject IC based on classfication by ICLabel
-opt.rejectIC.do = true;
-% rejection parameters, see MEEGtools.rejectICs
+
+% --- IC rejection
+% reject IC based on classfication by ICLabel ; if false, the EEG datasets
+% with ICA info will simply be saved, rejection can be done later. See e.g.
+% 'run_reject_ICs.m'
+opt.rejectIC.do = false;
+% rejection parameters, see MEEGtools.rejectICs ; only used if
+% opt.rejectIC.do == true;
 opt.rejectIC.rok = 'reject';
 opt.rejectIC.thresholds = [...
     0   0;... % 'Brain'
@@ -37,6 +49,23 @@ opt.rejectIC.thresholds = [...
     0.8 1;... % 'Line Noise'
     0.8 1;... % 'Channel Noise'
     0   0];   % 'Other'
+
+
+% --- where to save the EEG data with ICA rejection / ICA info
+% this can be changed, e.g. to run several ICAs with different options
+% e.g. concatenate over conditions or not, etc.
+if opt.rejectIC.do
+    saveFolder = [dataBaseFolder,'-ICr']; % IC rejection
+else
+    saveFolder = [dataBaseFolder,'-ICA']; % ICA info but not rejection
+end
+
+if opt.rejectIC.do
+    proc = [opt.in.proc,'-ICr']; % IC rejection
+else
+    proc = [opt.in.proc,'-ICA']; % ICA info but not rejection
+end
+opt.saveFolder = enICA.makePathEEGFolder(enICA.getPath('EEG','processed'),proc,opt.in.Fs);
 
 
 %% Set ICA options

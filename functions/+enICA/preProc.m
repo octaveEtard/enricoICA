@@ -44,7 +44,10 @@ if opt.filt.resample.do
 else
     Fs_ = inFile.Fs;
 end
+
 saveFolder = enICA.makePathEEGFolder(baseFolder_save,proc,Fs_);
+% raw data folder
+folderPath = enICA.makePathEEGFolder(baseFolder_load,inFile.proc,inFile.Fs);
 
 for iCond = 1:nCond
     condition = conditions{iCond};
@@ -55,11 +58,8 @@ for iCond = 1:nCond
         ALLEEG = [];
         
         for iiPart = 1:nParts
-            
-            idxPart = parts(iiPart);
-            
             % load raw data
-            folderPath = enICA.makePathEEGFolder(baseFolder_load,inFile.proc,inFile.Fs);
+            idxPart = parts(iiPart);
             % no extension
             fileName = enICA.makeNameEEGDataFile(SID,condition,idxPart);
             
@@ -98,7 +98,7 @@ for iCond = 1:nCond
         if ~opt.ASR.do
             continue;
         end
-        comments = cell(3+nParts,1);
+        comments = cell(4+nParts,1);
         nPnts = arrayfun(@(e) e.pnts,ALLEEG);
         
         % ---- merge data sets
@@ -107,11 +107,16 @@ for iCond = 1:nCond
         [comments{2:(nParts+1)}] = deal(ALLEEG.setname);
         
         % ---- run ASR
-        [EEG,~,~,removed_channels] = clean_artifacts(EEG,opt.ASR.opt{:});
+        chanLocs_beforeASR = EEG.chanlocs;
+        [EEG_,~,EEG,removed_channels] = clean_artifacts(EEG,opt.ASR.opt{:});
+        
         nRem = sum(removed_channels);
-        % original chan info in urchanlocs
-        remChan = {EEG.urchanlocs(removed_channels).labels};
-        % TODO store percent data too dirty
+        if 0 < nRem
+            % original chan info in urchanlocs
+            remChan = {chanLocs_beforeASR(removed_channels).labels};
+        else
+            remChan = {};
+        end
         
         % add comments
         asropt = cell(numel(opt.ASR.opt),1);
@@ -119,6 +124,18 @@ for iCond = 1:nCond
         
         comments{nParts+2} = sprintf('Run ASR, opt:%s',sprintf(' %s',asropt{:}));
         comments{nParts+3} = sprintf('%i removed channels:%s',nRem,sprintf(' %s',remChan{:}));
+        
+        % EEG_ will contain info on data judged 'irrecoverable' by ASR
+        % we do not remove these data portions, but store the fraction of
+        % 'irrecoverable' data:
+        if(isfield(EEG_.etc,'clean_sample_mask'))
+            f = 1 - sum(EEG_.etc.clean_sample_mask) / numel(EEG_.etc.clean_sample_mask);
+            comments{nParts+4} = sprintf('ASR irrecoverable data (on pooled data): %.2f %%',100*f);
+            EEG.etc.ASRirrecoverableFractionPooledData = f;
+        else
+            comments{nParts+4} = 'ASR not run to identify the % of irrecoverable data.';
+            EEG.etc.ASRirrecoverableFractionPooledData = NaN;
+        end
         
         % ---- add commens for the last operations
         EEG = MEEGtools.addComments(EEG,comments);
@@ -141,6 +158,15 @@ for iCond = 1:nCond
         for iiPart = 1:nParts
             EEGtmp = pop_select(EEG,'point',iBoundaries(iiPart,:));
             EEGtmp = MEEGtools.addComments(EEGtmp,'Split from merged dataset');
+            
+            % 'irrecoverable' data fraction for this dataset
+            if(isfield(EEG_.etc,'clean_sample_mask'))
+                f = 1 - sum(EEG_.etc.clean_sample_mask(iBoundaries(iiPart,1):iBoundaries(iiPart,2))) / EEGtmp.pnts;
+                EEG.etc.ASRirrecoverableFraction = f;
+            else
+                EEG.etc.ASRirrecoverableFraction = NaN;
+            end
+            
             % sanity check
             assert(nPnts(iiPart) == EEGtmp.pnts);
             

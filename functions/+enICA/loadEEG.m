@@ -6,11 +6,11 @@ function EEG = loadEEG(inFolder, inFileName)
 % try .set then .fif before giving up
 if isempty(ext)
     try
-        EEG = loadEEG(inFolder, [inFileName,'.set']);
+        EEG = enICA.loadEEG(inFolder, [inFileName,'.set']);
         return;
     catch
         try
-            EEG = loadSetOrVhdr(inFolder, [inFileName,'.fif']);
+            EEG = enICA.loadEEG(inFolder, [inFileName,'.fif']);
             return;
         catch
             error('Could not find %s in %s',inFileName,inFolder);
