@@ -1,8 +1,6 @@
 # enricoICA
 pre-processing & ICA code for Enrico. Requires the `MEEGtools` [package](https://github.com/octaveEtard/MEEGtools).
 
-Work in progress, but basic core functions are working.
-
 ## Installation
 This is a [Matlab package](https://uk.mathworks.com/help/matlab/matlab_oop/scoping-classes-with-packages.html): add folder `functions` to your path, and preface function names with `enICA.` to access them.
 Edit `enICA.getPath` to specify data location.
